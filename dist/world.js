@@ -1,3 +1,4 @@
+import {makeStarter,updateStarter} from './starter.js?v=marshal-5';
 import * as T from './vendor/three.module.js';
 import { ROAD_HALF, clamp } from './simulation.js';
 import { loadDriverAssets, makeDriver, makeSeat, animateDriver, DriverPortrait } from './drivers.js?v=drivers-2';
@@ -103,6 +104,7 @@ export class World {
     this.scene.add(this.sun,this.sun.target);
     this.buildSky();this.buildTerrain();this.buildTrack();this.buildScenery();
     this.cars=race.cars.map(c=>{const car=makeCar(c.color,c.id);this.scene.add(car.group);return car;});
+    this.starter=makeStarter();this.scene.add(this.starter.root);this.starterRemaining=7;
     this.buildParticles();this.resize();this.render(0,'intro');
   }
   async loadDrivers(){
@@ -241,6 +243,9 @@ export class World {
   }
   resize(){const w=this.canvas.clientWidth,h=this.canvas.clientHeight;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
   render(dt,state){
+    const marshalIntro=state==='countdown'&&this.race.time<.05;
+    if(state!=='paused')updateStarter(this.starter,this.track,this.starterRemaining,this.race.time,marshalIntro,this.elapsed);
+    if(this.wasMarshalIntro&&!marshalIntro)this.cameraReady=false;this.wasMarshalIntro=marshalIntro;
     this.elapsed+=dt;this.waterMat.uniforms.time.value=this.elapsed;
     for(let i=0;i<this.race.cars.length;i++){
       const data=this.race.cars[i],car=this.cars[i],f=data.frame;
@@ -254,7 +259,11 @@ export class World {
     }
     const p=this.race.player,forward=new T.Vector3(Math.sin(p.heading),0,Math.cos(p.heading));
     let desired,look,fov;
-    if(state==='intro'||state==='select'){
+    if(marshalIntro){
+      const f=this.track.at(60),n=this.starter.root.position;
+      desired=new T.Vector3(n.x-f.tx*4.3+f.nx*1.5,n.y+1.7,n.z-f.tz*4.3+f.nz*1.5);
+      look=new T.Vector3(n.x,n.y+1.05,n.z);fov=38;
+    }else if(state==='intro'||state==='select'){
       const f=this.track.at(p.progress),side=new T.Vector3(f.nx,0,f.nz);
       desired=new T.Vector3(p.x,p.y,p.z).addScaledVector(forward,-10.3).addScaledVector(side,5.6);desired.y+=4.4;
       look=new T.Vector3(p.x,p.y+1.5,p.z).addScaledVector(forward,24).addScaledVector(side,-1);fov=55;

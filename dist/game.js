@@ -1,6 +1,6 @@
 import { Circuit, Race, TOTAL_LAPS, clamp, angleDelta } from './simulation.js';
-import { OnlineRoom } from './online.js?v=realtime-4';
-import { World } from './world.js?v=realtime-4';
+import { OnlineRoom } from './online.js?v=marshal-5';
+import { World } from './world.js?v=marshal-5';
 
 const $=id=>document.getElementById(id);
 const track=new Circuit();
@@ -64,7 +64,7 @@ function announce(text,duration=2400){$('announcement').textContent=text;show('a
 function startRace(){
   if(!world.driverReady)return;
   online.close();race.playerId=0;race.multiplayer=false;show('online-lobby',false);show('online-status',false);
-  engine.start();race.reset();world.setDriver(world.selectedDriver);clearInput();world.cameraReady=false;state='countdown';countdownTime=3.3;lastCountdown='';accumulator=0;lastWrongWay=0;
+  engine.start();race.reset();world.setDriver(world.selectedDriver);clearInput();world.cameraReady=false;state='countdown';countdownTime=7;lastCountdown='';accumulator=0;lastWrongWay=0;
   for(const id of ['intro','circuit-card','intro-footer','results','pause-screen','announcement','driver-select'])show(id,false);
   for(const id of ['hud','pause','countdown','touch-controls'])show(id);
   show('driver-inset',world.showDriver);
@@ -213,8 +213,8 @@ function frame(now){
   const dt=Math.min((now-(lastNow||now))/1000,.06);lastNow=now;getInput();
   if(state==='countdown'){
     if(online.active)countdownTime=Math.max(.01,(online.room.startAt-online.serverNow)/1000);else countdownTime-=dt;
-    const text=countdownTime>0?String(Math.ceil(Math.min(3,countdownTime))):'GO';
-    if(text!==lastCountdown){$('countdown').textContent=text;lastCountdown=text;engine.beep(text==='GO'?880:440,text==='GO'?.3:.12);}
+    const text=countdownTime>3?'':countdownTime>0?String(Math.ceil(Math.min(3,countdownTime))):'GO';
+    if(text!==lastCountdown){$('countdown').textContent=text;lastCountdown=text;if(text)engine.beep(text==='GO'?880:440,text==='GO'?.3:.12);}
     if(countdownTime<=0){state='racing';accumulator=0;announce('BRAKE BEFORE BENDS · BOOST ON STRAIGHTS',3200);}
   }
   if(state==='racing'){
@@ -233,6 +233,7 @@ function frame(now){
   if(now>messageUntil)show('announcement',false);
   engine.update(race.player,state==='racing'||state==='countdown');
   hudTimer+=dt;if(hudTimer>.06){updateHud();hudTimer=0;}
+  world.starterRemaining=countdownTime;
   world.render(state==='paused'?0:dt,state);
 }
 

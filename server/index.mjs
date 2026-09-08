@@ -63,7 +63,7 @@ export function createGameServer({clock=()=>Date.now(),autoTick=true,allowedOrig
     }
     if(message.type==='start'){
      if(socket.slot!==0)throw Error('Yarışı oda sahibi başlatır.');if(room.phase!=='lobby'||!room.players[1])throw Error('İkinci oyuncuyu bekle.');
-     room.phase='countdown';room.startAt=clock()+3000;room.stepAt=room.startAt;room.reason='Yarış başlıyor.';
+     room.phase='countdown';room.startAt=clock()+7000;room.stepAt=room.startAt;room.reason='Yarış görevlisi başlangıca geliyor.';
     }else if(message.type==='pause'){
      if(['racing','countdown'].includes(room.phase)){room.phase='paused';room.reason='Oyunculardan biri yarışı duraklattı.';room.players.forEach(p=>p.input=zero());}
     }else if(message.type==='resume'){

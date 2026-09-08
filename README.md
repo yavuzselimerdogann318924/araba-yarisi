@@ -26,3 +26,7 @@ Sunucu fiziği mesaj geliş hızından bağımsız 60 Hz çalıştırır; görü
 Ayrı bir statik site kullanılırsa dist/server-config.js içine kendi wss://sunucu/online adresini yaz ve sunucudaki ALLOWED_ORIGINS değerine site adresini ekle. Aynı alan adında ek ayar gerekmez.
 
 Fotoğraflardan oluşturulan yüz derinliği tahminidir; tam baş taraması değildir. Three.js lisansı dist/vendor/THREE-LICENSE.txt içindedir.
+
+## Yarış görevlisi NPC
+
+Yarış öncesi 7 saniyelik girişte, seçilemeyen stilize 3D görevli yürüyerek başlangıç noktasına gelir ve damalı bayrakla start verir. Kısa kamera yakınlaşması sonrası sürüş kamerası geri gelir. NPC yolun dışında kalır; yüz ve kıyafetler fotoğraf dokusu olmadan geometriyle modellenmiştir. Online oyuncular aynı sunucu başlangıç saatini kullanır. Mevcut sürücü seçimi korunur.
