@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111a1f" />
+  <meta name="description" content="Race a three-dimensional coastal circuit against five rivals. Three laps, tight corners, and a shot at first place. Play with keyboard or touch controls." />
+  <title>APEX — Coastline</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./style.css?v=realtime-4" />
+</head>
+<body>
+  <main id="game" aria-label="APEX Coastline racing game">
+    <canvas id="world" aria-label="3D coastal racing circuit"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="APEX Coastline home"><span class="brand-mark">A</span><span>APEX<span class="brand-sub">COASTLINE</span></span></a>
+      <div class="session-label"><span class="tiny-line"></span> COASTLINE CIRCUIT <span class="session-separator">/</span> RACE DAY</div>
+      <div class="top-actions">
+        <button id="sound" class="icon-button" aria-label="Mute engine sound" title="Sound" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg></button>
+        <button id="fullscreen" class="icon-button" aria-label="Enter fullscreen" title="Fullscreen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
+        <button id="pause" class="icon-button hidden" aria-label="Pause race" title="Pause · P"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14m8-14v14"/></svg></button>
+      </div>
+    </header>
+
+    <section id="intro" class="intro panel-screen">
+      <div class="eyebrow"><span class="flag-mark">▦</span> THE COAST IS YOURS</div>
+      <h1>APEX<span>COASTLINE</span></h1>
+      <p class="intro-copy">Find your line. Chase the podium.</p>
+      <div class="race-spec"><div><strong>03</strong><span>LAPS</span></div><div><strong>06</strong><span>DRIVERS</span></div><div><strong id="track-length">2.4</strong><span>KM CIRCUIT</span></div></div>
+      <button id="start" class="primary-button" disabled><span id="start-label">PREPARING CIRCUIT</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+      <p class="start-hint" id="start-hint">Keyboard & touch controls</p>
+    </section>
+
+    <section id="driver-select" class="driver-select hidden" aria-labelledby="driver-title">
+      <div class="driver-choice-panel">
+        <div class="eyebrow">DİREKSİYON SENDE</div>
+        <h2 id="driver-title">Karakterini seç.</h2>
+        <p class="driver-intro">Sürücünü seç, piste çık.</p>
+        <fieldset class="driver-options"><legend class="sr-only">Yarış karakteri</legend>
+          <label class="driver-option"><input type="radio" name="driver" value="0" checked /><span class="driver-photo driver-photo-one"><img src="./drivers/driver-01.jpeg" alt="Birinci fotoğraftaki uzun koyu saçlı karakter" /></span><span class="driver-option-copy"><strong>Karakter 01</strong><small>Beyaz gömlek · Uzun saç</small></span><span class="driver-check" aria-hidden="true">✓</span></label>
+          <label class="driver-option"><input type="radio" name="driver" value="1" /><span class="driver-photo driver-photo-two"><img src="./drivers/driver-02.jpeg" alt="İkinci fotoğraftaki kısa koyu saçlı karakter" /></span><span class="driver-option-copy"><strong>Karakter 02</strong><small>Koyu bluz · Kısa saç</small></span><span class="driver-check" aria-hidden="true">✓</span></label>
+        </fieldset>
+        <button id="confirm-driver" class="primary-button" disabled>YÜZLER HAZIRLANIYOR <span>→</span></button>
+        <button id="online-play" class="secondary-button" disabled>ONLINE · 2 KİŞİ</button>
+        <button id="back-to-intro" class="driver-back">← GERİ DÖN</button>
+        <p class="driver-control-hint" id="driver-control-hint">Tablette gaz ve yön tuşlarına birlikte basabilirsin.</p>
+      </div>
+      <div class="driver-preview-label"><span id="selected-driver-name">KARAKTER 01</span><span>3D SÜRÜCÜ</span></div>
+      <div id="driver-orbit" class="driver-orbit" aria-label="3D karakteri döndürmek için sürükleyin"><span>Yakından görmek için sürükle</span></div>
+    </section>
+
+    <section id="online-lobby" class="modal-shade hidden" role="dialog" aria-modal="true" aria-labelledby="online-title">
+      <div class="race-dialog online-dialog">
+        <span class="eyebrow">ARKADAŞINLA AYNI PİSTTE</span><h2 id="online-title">Online yarış.</h2>
+        <div id="room-entry">
+          <p>Bir oda açıp kodu arkadaşına ver veya onun koduyla katıl.</p>
+          <button id="create-room" class="primary-button">ODA OLUŞTUR <span>+</span></button>
+          <div class="room-divider">VEYA KODLA KATIL</div>
+          <form id="join-room-form"><label class="sr-only" for="room-code-input">6 haneli oda kodu</label><div class="room-join-row"><input id="room-code-input" name="code" placeholder="ABC234" maxlength="6" minlength="6" required autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="6 haneli oda kodu"/><button id="join-room" type="submit">KATIL →</button></div></form>
+        </div>
+        <div id="room-waiting" class="hidden">
+          <span class="room-code-label">ODA KODU</span><div class="room-code-row"><strong id="room-code">------</strong><button id="copy-room" aria-label="Oda kodunu kopyala">KOPYALA</button></div>
+          <div class="room-players"><div><span>01</span><strong id="room-player-0">Oda sahibi</strong><small id="room-state-0">Hazır</small></div><div><span>02</span><strong id="room-player-1">Arkadaşın bekleniyor</strong><small id="room-state-1">Bekleniyor</small></div></div>
+          <p id="room-status" role="status">Arkadaşına oda kodunu gönder.</p>
+          <button id="room-start" class="primary-button" disabled>YARIŞI BAŞLAT <span>→</span></button>
+        </div>
+        <p id="room-error" class="room-error hidden" role="alert"></p>
+        <button id="leave-room" class="secondary-button">GERİ DÖN</button>
+      </div>
+    </section>
+
+    <aside id="circuit-card" class="circuit-card">
+      <div class="card-head"><span>THE CIRCUIT</span><span class="weather">☀ &nbsp; 24°C</span></div>
+      <canvas id="preview-map" width="320" height="230" aria-label="Coastline circuit map"></canvas>
+      <div class="circuit-name">Coastline <span>01</span></div>
+      <p>Coastal straights. Mountain bends.</p>
+    </aside>
+
+    <footer id="intro-footer" class="intro-footer"><span>GT CLASS <i></i> DRY ASPHALT</span><span class="desktop-help"><kbd>W A S D</kbd> Drive <b>·</b> <kbd>SHIFT</kbd> Boost <b>·</b> <kbd>SPACE</kbd> Handbrake</span><span class="touch-help">Steer left. Pedals right. Hold boost to pass.</span></footer>
+
+    <div id="hud" class="hidden" aria-label="Race information">
+      <div id="online-status" class="online-status hidden" role="status"></div>
+      <div class="race-top">
+        <div class="position-stat"><span class="hud-label">POSITION</span><div><strong id="position">6</strong><span>/ 6</span></div></div>
+        <div class="lap-stat"><span class="hud-label">LAP</span><div><strong id="lap">1</strong><span>/ 3</span></div></div>
+        <div class="time-stat"><span class="hud-label">RACE TIME</span><strong id="time">00:00.000</strong><span id="best-lap">BEST LAP —</span></div>
+      </div>
+      <div class="race-map"><canvas id="minimap" width="240" height="190" aria-label="Live race map"></canvas><span>COASTLINE CIRCUIT</span></div>
+      <aside id="driver-inset" class="driver-inset" aria-label="Araba içindeki seçili 3D sürücü"><span id="driver-inset-name">KARAKTER 01</span><span class="driver-live-label">KOKPİT</span></aside>
+      <div class="speedometer">
+        <div class="gear-block"><span id="gear">N</span><small>GEAR</small></div>
+        <div class="speed-block"><div><strong id="speed">000</strong><span>KM/H</span></div><div class="rev-track"><i id="revs"></i></div></div>
+        <div class="boost-track"><span>BOOST</span><div><i id="boost-fill"></i></div><small class="desktop-help">SHIFT</small></div>
+      </div>
+      <div class="race-tools"><button id="camera" aria-label="Change camera">CAMERA <kbd>C</kbd></button><button id="driver-view" aria-label="Sürücüyü yakından göster" aria-pressed="false">SÜRÜCÜ</button><button id="reset" aria-label="Return car to track">RESET <kbd>R</kbd></button></div>
+      <div class="race-help desktop-help"><span><kbd>↑ ↓ ← →</kbd> DRIVE</span><span><kbd>SPACE</kbd> HANDBRAKE</span><span><kbd>P</kbd> PAUSE</span></div>
+    </div>
+
+    <div id="announcement" class="announcement hidden" role="status" aria-live="polite"></div>
+    <div id="countdown" class="countdown hidden" aria-live="assertive"></div>
+
+    <div id="touch-controls" class="touch-controls hidden" aria-label="Touch driving controls">
+      <div class="steering-controls"><button data-control="left" aria-label="Steer left"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m20 7-9 9 9 9"/></svg></button><button data-control="right" aria-label="Steer right"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m12 7 9 9-9 9"/></svg></button></div>
+      <div class="touch-middle"><button class="touch-boost" data-control="boost" aria-label="Activate boost">BOOST</button><button class="touch-handbrake" data-control="handbrake" aria-label="El freni">EL FRENİ</button></div>
+      <div class="pedals"><button class="brake-pedal" data-control="brake" aria-label="Brake">FREN</button><button class="gas-pedal" data-control="throttle" aria-label="Accelerate"><span>▴</span>GAZ</button></div>
+    </div>
+
+    <section id="pause-screen" class="modal-shade hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="race-dialog"><span class="eyebrow">TAKE A BREATHER</span><h2 id="pause-title">Race paused.</h2><p>Your next corner can wait.</p><button id="resume" class="primary-button">RESUME RACE <span>→</span></button><button id="restart" class="secondary-button">RESTART RACE</button><p class="dialog-help">WASD / Arrows · Drive<br>Shift · Boost &nbsp; Space · Handbrake<br>C · Camera &nbsp; R · Return to track</p></div></section>
+
+    <section id="results" class="modal-shade hidden" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="race-dialog result-dialog"><span class="eyebrow">CHEQUERED FLAG</span><h2 id="result-title">Race complete.</h2><div class="finish-position"><strong id="finish-place">1</strong><span id="finish-suffix">ST</span></div><p id="finish-message">A drive to remember.</p><div class="finish-stats"><div><span>RACE TIME</span><strong id="finish-time">00:00.000</strong></div><div><span>BEST LAP</span><strong id="finish-best">00:00.000</strong></div></div><button id="race-again" class="primary-button">RACE AGAIN <span>→</span></button><button id="change-driver" class="secondary-button">KARAKTER DEĞİŞTİR</button></div></section>
+    <div id="error" class="modal-shade hidden" role="alert"><div class="race-dialog"><h2>Let’s get you racing.</h2><p id="error-message">3D graphics could not start. Try opening this game in Safari or Chrome with hardware acceleration enabled.</p><button class="primary-button" onclick="location.reload()">TRY AGAIN</button></div></div>
+  </main>
+  <script src="./server-config.js"></script>
+  <script type="module">
+    import('./game.js?v=realtime-4').catch(error => {
+      console.error(error);
+      document.getElementById('error').classList.remove('hidden');
+      document.getElementById('start-label').textContent = 'UNABLE TO START';
+    });
+  </script>
+</body>
+</html>

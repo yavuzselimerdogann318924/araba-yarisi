@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: araba-yarisi
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production

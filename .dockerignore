@@ -1,0 +1,5 @@
+node_modules
+.git
+.openai
+dist/server
+dist/.openai
