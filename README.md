@@ -1,6 +1,5 @@
 # Araba Yarışı
 
-**Kurulum durumu:** Oyun kodları aktarıldı. Karakter fotoğrafları ve yüz modelleri, herkese açık paylaşım onayı beklediği için henüz eklenmedi. Bu dört dosya tamamlanmadan karakter seçimi ve yayın hazır değildir.
 
 3D karakter seçimi, tablet dokunmatik kontrolleri ve oda koduyla iki kişilik online yarış.
 
