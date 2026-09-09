@@ -29,6 +29,6 @@ Fotoğraflardan oluşturulan yüz derinliği tahminidir; tam baş taraması değ
 
 ## Yarış görevlisi NPC
 
-Yarış öncesi 7 saniyelik girişte, seçilemeyen stilize 3D görevli yürüyerek başlangıç noktasına gelir ve damalı bayrakla start verir. Kısa kamera yakınlaşması sonrası sürüş kamerası geri gelir. NPC yolun dışında kalır; yüz ve kıyafetler fotoğraf dokusu olmadan geometriyle modellenmiştir. Online oyuncular aynı sunucu başlangıç saatini kullanır. Mevcut sürücü seçimi korunur.
+Yarış öncesinde görevli yürür, bayrakla start verir. Referans fotoğrafı 468 noktalı, derinlikli yüz geometrisine UV ile uygulanır; düz bir resim levhası değildir. Konuşma sırasında hafif ağız ve baş hareketleri, yürüyüş ve bayrak animasyonları korunur.
 
-NPC yüzü, referanstan elde edilen 468 işaret noktasına göre oluşturulan derinlikli geometri kullanır; fotoğraf, UV haritası veya fotoğraftan alınmış piksel renkleri içermez. Tek fotoğraftan derinlik tahminidir; birebir baş taraması değildir. Başlangıçta yüzü göstermek için kısa yakın çekim bulunur.
+Görevli başlangıçta “kıh kıh kıh, let’s start” der. Ses tarayıcının yerleşik konuşma sentezidir; gerçek kişinin sesi taklit edilmez. Türkçe ve İngilizce seslerin kullanılabilirliği cihaza göre değişir. Ses kapalıysa veya konuşma sentezi desteklenmiyorsa altyazı görünür. Yaklaşık ağız hareketi kullanılır; fonem düzeyinde dudak senkronizasyonu değildir.

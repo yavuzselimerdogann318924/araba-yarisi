@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {makeStarter,updateStarter,starterPose} from '../dist/starter.js';
 import {Circuit,ROAD_HALF} from '../dist/simulation.js';
-test('marshal is textured-photo-free 3D geometry with articulated walking and flag',()=>{
+test('marshal keeps articulated 3D geometry with articulated walking and flag',()=>{
  const npc=makeStarter(),track=new Circuit();let vertices=0;
  npc.root.traverse(obj=>{if(obj.isMesh){for(const material of (Array.isArray(obj.material)?obj.material:[obj.material]))assert(!material.map);const p=obj.geometry.attributes.position;vertices+=p.count;assert([...p.array].every(Number.isFinite));}});
  assert(vertices>1000);assert.equal(npc.legs.length,2);assert.equal(npc.arms.length,2);
@@ -12,8 +12,8 @@ test('marshal is textured-photo-free 3D geometry with articulated walking and fl
  assert(starterPose(0,0,true).signal>.99);assert.equal(starterPose(0,5,false).walking,false);
 });
 
-test('reference-fitted face has real depth and no photographic UV mapping',()=>{
- const npc=makeStarter();const face=npc.root.getObjectByName('reference-fitted-face');assert(face);assert.equal(npc.head.userData.landmarkCount,468);assert(!face.geometry.attributes.uv);
+test('photo-mapped face retains depth and matching UV coordinates',()=>{
+ const npc=makeStarter();const face=npc.root.getObjectByName('reference-fitted-face');assert(face);assert.equal(npc.head.userData.landmarkCount,468);assert.equal(face.geometry.attributes.uv.count,468);
  const position=face.geometry.attributes.position;const depths=Array.from({length:position.count},(_,i)=>position.getZ(i));assert(Math.max(...depths)-Math.min(...depths)>.06);
- assert(face.geometry.groups.some(g=>g.materialIndex===1));
+ assert.equal(face.userData.rest.length,468*3);
 });

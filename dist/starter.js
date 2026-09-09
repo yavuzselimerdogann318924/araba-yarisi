@@ -1,4 +1,4 @@
-import {makeFittedHead} from './fitted-head.js?v=face-6';
+import {makeFittedHead,animateFittedFace} from './fitted-head.js?v=photo-7';
 import * as T from './vendor/three.module.js';
 import {ROAD_HALF,clamp} from './simulation.js';
 
@@ -58,7 +58,7 @@ export function makeStarter(){
  for(let i=0;i<points.count;i+=3){let x=0,y=0;for(let k=0;k<3;k++){x+=points.getX(i+k)/3;y+=points.getY(i+k)/3;}const light=(Math.floor((x-.01)/(.65/6))+Math.floor((y-.245)/(.43/4)))%2===0;for(let k=0;k<3;k++)colors.push(...(light?[.93,.93,.89]:[.035,.045,.05]));}
  checker.setAttribute('color',new T.Float32BufferAttribute(colors,3));const cloth=new T.Mesh(checker,flagMaterial);flag.add(cloth);flagGeometry.dispose();
  const base=Float32Array.from(checker.attributes.position.array);
- root.userData={kind:'race-marshal',photoTexture:false};
+ root.userData={kind:'race-marshal',photoTexture:true};
  return {root,body,head,legs,arms,flag,cloth,base};
 }
 export function starterPose(remaining,raceTime,active){
@@ -66,6 +66,7 @@ export function starterPose(remaining,raceTime,active){
  return {s:60-4*clamp((raceTime-1)/3,0,1),walking:raceTime>1&&raceTime<4,phase:raceTime*8,raise:raceTime<1?1:0,signal:1,turn:Math.PI};
 }
 export function updateStarter(npc,track,remaining,raceTime,active,elapsed){
+ animateFittedFace(npc.head,elapsed,npc.speaking===true);
  const pose=starterPose(remaining,raceTime,active),f=track.at(pose.s),lane=ROAD_HALF+1.6;
  npc.root.position.set(f.x+f.nx*lane,f.y+.04,f.z+f.nz*lane);npc.root.rotation.y=Math.atan2(f.tx,f.tz)+pose.turn;
  const gait=pose.walking?Math.sin(pose.phase):0;npc.body.position.y=pose.walking?Math.abs(Math.cos(pose.phase))*.025:Math.sin(elapsed*1.6)*.003;

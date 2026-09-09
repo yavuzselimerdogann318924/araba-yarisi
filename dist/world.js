@@ -1,4 +1,4 @@
-import {makeStarter,updateStarter} from './starter.js?v=face-6';
+import {makeStarter,updateStarter} from './starter.js?v=photo-7';
 import * as T from './vendor/three.module.js';
 import { ROAD_HALF, clamp } from './simulation.js';
 import { loadDriverAssets, makeDriver, makeSeat, animateDriver, DriverPortrait } from './drivers.js?v=drivers-2';

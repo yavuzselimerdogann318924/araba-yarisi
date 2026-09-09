@@ -1,4 +1,4 @@
-"""Estimate untextured face geometry from a local reference; never export image pixels or UVs.
+"""Estimate 3D face geometry and photographic UV coordinates from a local reference.
 Usage: python tools/reconstruct-marshal.py REFERENCE_IMAGE
 Requires mediapipe 0.10.21, numpy, scipy, Pillow. Single-image depth is approximate.
 """
@@ -32,11 +32,11 @@ with mp.solutions.face_mesh.FaceMesh(static_image_mode=True,max_num_faces=1,refi
  triangles=[];groups=[]
  for tri in Delaunay(local[:,:2]).simplices:
   a,b,c=map(int,tri);center=local[tri,:2].mean(axis=0)
-  if any(inside(center,ids) for ids in eyes+[mouth]):continue
+  # Keep eyes and mouth triangles so the photo covers the entire sculpted face.
   if np.cross(local[b]-local[a],local[c]-local[a])[2]<0:b,c=c,b
   triangles.extend([a,b,c]);groups.append(1 if inside(center,lips) else 0)
- data={'positions':np.round(local,6).ravel().tolist(),'indices':triangles,'groups':groups,'eyes':eyes,'mouth':mouth,'brows':[[70,63,105,66,107],[336,296,334,293,300]],'vertexCount':468,'photoTexture':False}
+ data={'positions':np.round(local,6).ravel().tolist(),'indices':triangles,'groups':groups,'eyes':eyes,'mouth':mouth,'brows':[[70,63,105,66,107],[336,296,334,293,300]],'vertexCount':468,'photoTexture':True,'uv':np.round(np.array([[p.x,1-p.y] for p in result.multi_face_landmarks[0].landmark[:468]]),6).ravel().tolist()}
  dest=Path(__file__).resolve().parents[1]/'dist/marshal-face.js'
- dest.write_text('// Reference-fitted 3D geometry. No image, UV coordinates, or photo-derived colors.\nexport const marshalFace='+json.dumps(data,separators=(',',':'))+';\n')
+ dest.write_text('// Reference-fitted 3D geometry. Photo UV coordinates on reference-fitted 3D geometry.\nexport const marshalFace='+json.dumps(data,separators=(',',':'))+';\n')
  print('Vertices:',len(local),'triangles:',len(triangles)//3,'bounds:',local.min(axis=0),local.max(axis=0))
  print('eye centers:',[local[ids].mean(axis=0).tolist() for ids in eyes])
