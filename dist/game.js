@@ -1,6 +1,6 @@
 import { Circuit, Race, TOTAL_LAPS, clamp, angleDelta } from './simulation.js';
-import { OnlineRoom } from './online.js?v=marshal-5';
-import { World } from './world.js?v=marshal-5';
+import { OnlineRoom } from './online.js?v=face-6';
+import { World } from './world.js?v=face-6';
 
 const $=id=>document.getElementById(id);
 const track=new Circuit();

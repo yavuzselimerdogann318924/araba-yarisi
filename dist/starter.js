@@ -1,3 +1,4 @@
+import {makeFittedHead} from './fitted-head.js?v=face-6';
 import * as T from './vendor/three.module.js';
 import {ROAD_HALF,clamp} from './simulation.js';
 
@@ -8,7 +9,7 @@ function tube(parent,points,radius,material){const curve=new T.CatmullRomCurve3(
 function garment(parent,rings,material){const vertices=[],indices=[],n=28;for(const [y,x,z] of rings)for(let i=0;i<=n;i++){const a=i/n*Math.PI*2,fold=1+.022*Math.cos(a*8);vertices.push(Math.sin(a)*x*fold,y,Math.cos(a)*z*fold);}for(let j=0;j<rings.length-1;j++)for(let i=0;i<n;i++){const a=j*(n+1)+i,b=a+n+1;indices.push(a,a+1,b,a+1,b+1,b);}const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));if(rings[1][0]<rings[0][0])for(let i=0;i<indices.length;i+=3)[indices[i+1],indices[i+2]]=[indices[i+2],indices[i+1]];g.setIndex(indices);g.computeVertexNormals();const m=new T.Mesh(g,material);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
 export function makeStarter(){
  const root=new T.Group(),body=new T.Group();root.add(body);
- const skin=mat(0xc99075,.78),cream=mat(0xf4ead4,.87),white=mat(0xe5e9ee,.92),hair=mat(0x30201c,.88),highlight=mat(0x5c3e2d,.82),gold=mat(0xd4ad62,.3,.75),eyes=mat(0xf4eee8,.5),iris=mat(0x594438,.48),pupil=mat(0x171516),lips=mat(0xad5e64,.6),brow=mat(0x352622);
+ const skin=mat(0xc5957d,.82),cream=mat(0xf4ead4,.87),white=mat(0xe5e9ee,.92),hair=mat(0x30201c,.88),highlight=mat(0x5c3e2d,.82),gold=mat(0xd4ad62,.3,.75),eyes=mat(0xf4eee8,.5),iris=mat(0x594438,.48),pupil=mat(0x171516),lips=mat(0xa65d66,.72),brow=mat(0x352622);
  const hips=new T.Group();hips.position.y=.88;body.add(hips);
  garment(hips,[[-.07,.205,.125],[.06,.20,.125],[.18,.16,.10]],white);
  const torso=new T.Group();torso.position.y=.91;body.add(torso);
@@ -18,29 +19,17 @@ export function makeStarter(){
  ellipsoid(torso,skin,[0,.422,0],[.218,.075,.12]);
  ellipsoid(torso,skin,[0,.50,0],[.063,.115,.062]);
  const head=new T.Group();head.position.set(0,.665,.008);torso.add(head);
- ellipsoid(head,skin,[0,0,0],[.123,.171,.109]);
- ellipsoid(head,skin,[0,-.086,.033],[.083,.084,.084]);
+ makeFittedHead(head,{skin,lips,brow,eyes,iris,pupil});
  for(const side of [-1,1]){
-  ellipsoid(head,skin,[side*.12,-.005,0],[.023,.041,.024]);
-  ellipsoid(head,skin,[side*.059,-.044,.083],[.047,.038,.023]);
-  const eye=ellipsoid(head,eyes,[side*.049,.025,.096],[.032,.015,.012]);eye.rotation.z=side*.08;
-  ellipsoid(head,iris,[side*.048,.025,.107],[.012,.012,.004]);
-  ellipsoid(head,pupil,[side*.048,.025,.111],[.006,.008,.002]);
-  ellipsoid(head,eyes,[side*.048-.003,.029,.113],[.0025,.0025,.001]);
-  tube(head,[[side*.018,.060,.096],[side*.047,.068,.099],[side*.08,.058,.083]],.007,brow);
-  tube(head,[[side*.02,.033,.105],[side*.05,.043,.108],[side*.078,.03,.098]],.0028,brow);
-  ellipsoid(head,gold,[side*.133,-.039,.007],[.01,.023,.008]);
+  ellipsoid(head,skin,[side*.129,-.005,.018],[.018,.038,.020]);
+  ellipsoid(head,gold,[side*.135,-.039,.023],[.008,.018,.006]);
  }
- ellipsoid(head,skin,[0,-.004,.104],[.017,.041,.019]);
- ellipsoid(head,skin,[0,-.027,.121],[.025,.014,.018]);
- tube(head,[[-.039,-.070,.100],[-.017,-.068,.113],[0,-.073,.117],[.018,-.066,.111],[.037,-.061,.099]],.0055,lips);
- ellipsoid(head,lips,[0,-.080,.107],[.027,.007,.01]);
  // Crown mesh covers the back and crown, leaving the modeled face exposed.
  const cap=new T.Mesh(new T.SphereGeometry(1,24,14,0,Math.PI*2,0,1.33),hair);cap.scale.set(.137,.19,.123);cap.position.y=.012;head.add(cap);
- ellipsoid(head,hair,[0,-.027,-.073],[.141,.19,.083]);
- for(const side of [-1,1])for(let i=0;i<5;i++){
-  const x=side*(.062+i*.014),z=i<3?.028:-.025;
-  tube(head,[[side*.012,.178,-.003],[x,.12,z],[side*(.127+i*.008),-.03,z],[side*(.135+i*.011),-.20,z+.012],[side*(.17+i*.008),-.37,z+.022],[side*(.145+i*.01),-.48,z+.035]],.022,i%3===0?highlight:hair);
+ ellipsoid(head,hair,[0,.015,-.085],[.135,.153,.071]);
+ for(const side of [-1,1])for(let i=0;i<10;i++){
+  const x=side*(.060+i*.008),z=i<5?.045:-.028;
+  tube(head,[[side*.012,.178,-.003],[x,.12,z],[side*(.13+i*.004),-.03,z],[side*(.138+i*.006),-.20,z+.012],[side*(.165+i*.005),-.37,z+.022],[side*(.142+i*.005),-.48,z+.035]],.012,i%5===0?highlight:hair);
  }
  tube(torso,[[-.12,.456,.073],[-.065,.405,.123],[0,.395,.132],[.067,.412,.115],[.12,.454,.072]],.0025,gold);
  ellipsoid(torso,gold,[0,.384,.137],[.009,.013,.003]);

@@ -30,3 +30,5 @@ Fotoğraflardan oluşturulan yüz derinliği tahminidir; tam baş taraması değ
 ## Yarış görevlisi NPC
 
 Yarış öncesi 7 saniyelik girişte, seçilemeyen stilize 3D görevli yürüyerek başlangıç noktasına gelir ve damalı bayrakla start verir. Kısa kamera yakınlaşması sonrası sürüş kamerası geri gelir. NPC yolun dışında kalır; yüz ve kıyafetler fotoğraf dokusu olmadan geometriyle modellenmiştir. Online oyuncular aynı sunucu başlangıç saatini kullanır. Mevcut sürücü seçimi korunur.
+
+NPC yüzü, referanstan elde edilen 468 işaret noktasına göre oluşturulan derinlikli geometri kullanır; fotoğraf, UV haritası veya fotoğraftan alınmış piksel renkleri içermez. Tek fotoğraftan derinlik tahminidir; birebir baş taraması değildir. Başlangıçta yüzü göstermek için kısa yakın çekim bulunur.

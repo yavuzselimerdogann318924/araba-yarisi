@@ -1,4 +1,4 @@
-import {makeStarter,updateStarter} from './starter.js?v=marshal-5';
+import {makeStarter,updateStarter} from './starter.js?v=face-6';
 import * as T from './vendor/three.module.js';
 import { ROAD_HALF, clamp } from './simulation.js';
 import { loadDriverAssets, makeDriver, makeSeat, animateDriver, DriverPortrait } from './drivers.js?v=drivers-2';
@@ -261,8 +261,10 @@ export class World {
     let desired,look,fov;
     if(marshalIntro){
       const f=this.track.at(60),n=this.starter.root.position;
-      desired=new T.Vector3(n.x-f.tx*4.3+f.nx*1.5,n.y+1.7,n.z-f.tz*4.3+f.nz*1.5);
-      look=new T.Vector3(n.x,n.y+1.05,n.z);fov=38;
+      const portrait=this.starterRemaining<3.6&&this.starterRemaining>1.05;
+      const distance=portrait?1.35:4.3,side=portrait?.15:1.5;
+      desired=new T.Vector3(n.x-f.tx*distance+f.nx*side,n.y+(portrait?1.62:1.7),n.z-f.tz*distance+f.nz*side);
+      look=new T.Vector3(n.x,n.y+(portrait?1.56:1.05),n.z);fov=portrait?31:38;
     }else if(state==='intro'||state==='select'){
       const f=this.track.at(p.progress),side=new T.Vector3(f.nx,0,f.nz);
       desired=new T.Vector3(p.x,p.y,p.z).addScaledVector(forward,-10.3).addScaledVector(side,5.6);desired.y+=4.4;
