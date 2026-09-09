@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#111a1f" />
   <meta name="description" content="Race a three-dimensional coastal circuit against five rivals. Three laps, tight corners, and a shot at first place. Play with keyboard or touch controls." />
-  <title>APEX — Coastline</title>
+  <title>Yavuzselimerdogan — Coastline</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./style.css?v=photo-7" />
+  <link rel="stylesheet" href="./style.css?v=lidya-8" />
 </head>
 <body>
-  <main id="game" aria-label="APEX Coastline racing game">
+  <main id="game" aria-label="Yavuzselimerdogan Coastline racing game">
     <canvas id="world" aria-label="3D coastal racing circuit"></canvas>
     <div class="vignette" aria-hidden="true"></div>
     <header class="topbar">
-      <a class="brand" href="./" aria-label="APEX Coastline home"><span class="brand-mark">A</span><span>APEX<span class="brand-sub">COASTLINE</span></span></a>
+      <a class="brand" href="./" aria-label="Yavuzselimerdogan Coastline home"><span class="brand-mark">Y</span><span>Yavuzselimerdogan<span class="brand-sub">COASTLINE</span></span></a>
       <div class="session-label"><span class="tiny-line"></span> COASTLINE CIRCUIT <span class="session-separator">/</span> RACE DAY</div>
       <div class="top-actions">
         <button id="sound" class="icon-button" aria-label="Mute engine sound" title="Sound" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg></button>
@@ -25,7 +25,7 @@
 
     <section id="intro" class="intro panel-screen">
       <div class="eyebrow"><span class="flag-mark">▦</span> THE COAST IS YOURS</div>
-      <h1>APEX<span>COASTLINE</span></h1>
+      <h1>Yavuzselimerdogan<span>COASTLINE</span></h1>
       <p class="intro-copy">Find your line. Chase the podium.</p>
       <div class="race-spec"><div><strong>03</strong><span>LAPS</span></div><div><strong>06</strong><span>DRIVERS</span></div><div><strong id="track-length">2.4</strong><span>KM CIRCUIT</span></div></div>
       <button id="start" class="primary-button" disabled><span id="start-label">PREPARING CIRCUIT</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
@@ -38,15 +38,15 @@
         <h2 id="driver-title">Karakterini seç.</h2>
         <p class="driver-intro">Sürücünü seç, piste çık.</p>
         <fieldset class="driver-options"><legend class="sr-only">Yarış karakteri</legend>
-          <label class="driver-option"><input type="radio" name="driver" value="0" checked /><span class="driver-photo driver-photo-one"><img src="./drivers/driver-01.jpeg" alt="Birinci fotoğraftaki uzun koyu saçlı karakter" /></span><span class="driver-option-copy"><strong>Karakter 01</strong><small>Beyaz gömlek · Uzun saç</small></span><span class="driver-check" aria-hidden="true">✓</span></label>
-          <label class="driver-option"><input type="radio" name="driver" value="1" /><span class="driver-photo driver-photo-two"><img src="./drivers/driver-02.jpeg" alt="İkinci fotoğraftaki kısa koyu saçlı karakter" /></span><span class="driver-option-copy"><strong>Karakter 02</strong><small>Koyu bluz · Kısa saç</small></span><span class="driver-check" aria-hidden="true">✓</span></label>
+          <label class="driver-option"><input type="radio" name="driver" value="0" checked /><span class="driver-photo driver-photo-one"><img src="./drivers/driver-01.jpeg" alt="Birinci fotoğraftaki uzun koyu saçlı karakter" /></span><span class="driver-option-copy"><strong>1</strong></span><span class="driver-check" aria-hidden="true">✓</span></label>
+          <label class="driver-option"><input type="radio" name="driver" value="1" /><span class="driver-photo driver-photo-two"><img src="./drivers/driver-02.jpeg" alt="İkinci fotoğraftaki kısa koyu saçlı karakter" /></span><span class="driver-option-copy"><strong>2</strong></span><span class="driver-check" aria-hidden="true">✓</span></label>
         </fieldset>
         <button id="confirm-driver" class="primary-button" disabled>YÜZLER HAZIRLANIYOR <span>→</span></button>
         <button id="online-play" class="secondary-button" disabled>ONLINE · 2 KİŞİ</button>
         <button id="back-to-intro" class="driver-back">← GERİ DÖN</button>
         <p class="driver-control-hint" id="driver-control-hint">Tablette gaz ve yön tuşlarına birlikte basabilirsin.</p>
       </div>
-      <div class="driver-preview-label"><span id="selected-driver-name">KARAKTER 01</span><span>3D SÜRÜCÜ</span></div>
+      <div class="driver-preview-label"><span id="selected-driver-name">1</span><span>3D SÜRÜCÜ</span></div>
       <div id="driver-orbit" class="driver-orbit" aria-label="3D karakteri döndürmek için sürükleyin"><span>Yakından görmek için sürükle</span></div>
     </section>
 
@@ -87,7 +87,7 @@
         <div class="time-stat"><span class="hud-label">RACE TIME</span><strong id="time">00:00.000</strong><span id="best-lap">BEST LAP —</span></div>
       </div>
       <div class="race-map"><canvas id="minimap" width="240" height="190" aria-label="Live race map"></canvas><span>COASTLINE CIRCUIT</span></div>
-      <aside id="driver-inset" class="driver-inset" aria-label="Araba içindeki seçili 3D sürücü"><span id="driver-inset-name">KARAKTER 01</span><span class="driver-live-label">KOKPİT</span></aside>
+      <aside id="driver-inset" class="driver-inset" aria-label="Araba içindeki seçili 3D sürücü"><span id="driver-inset-name">1</span><span class="driver-live-label">KOKPİT</span></aside>
       <div class="speedometer">
         <div class="gear-block"><span id="gear">N</span><small>GEAR</small></div>
         <div class="speed-block"><div><strong id="speed">000</strong><span>KM/H</span></div><div class="rev-track"><i id="revs"></i></div></div>
@@ -113,7 +113,7 @@
   </main>
   <script src="./server-config.js"></script>
   <script type="module">
-    import('./game.js?v=photo-7').catch(error => {
+    import('./game.js?v=lidya-8').catch(error => {
       console.error(error);
       document.getElementById('error').classList.remove('hidden');
       document.getElementById('start-label').textContent = 'UNABLE TO START';

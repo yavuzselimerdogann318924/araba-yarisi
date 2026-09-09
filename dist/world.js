@@ -1,7 +1,7 @@
-import {makeStarter,updateStarter} from './starter.js?v=photo-7';
+import {makeStarter,updateStarter} from './starter.js?v=lidya-8';
 import * as T from './vendor/three.module.js';
 import { ROAD_HALF, clamp } from './simulation.js';
-import { loadDriverAssets, makeDriver, makeSeat, animateDriver, DriverPortrait } from './drivers.js?v=drivers-2';
+import { loadDriverAssets, makeDriver, makeSeat, animateDriver, DriverPortrait } from './drivers.js?v=lidya-8';
 
 const UP=new T.Vector3(0,1,0);
 function rng(seed=54321){return()=>{seed=(Math.imul(seed,1664525)+1013904223)|0;return(seed>>>0)/4294967296;};}
@@ -183,7 +183,7 @@ export class World {
     const frame=material(0x273c45,.65,.3);
     for(const x of [-9,9])arch.add(mesh(new T.BoxGeometry(.65,8,.65),frame,x,4,0));
     arch.add(mesh(new T.BoxGeometry(18.8,2,.8),frame,0,7.9,0));
-    const bannerTex=canvasTexture(1024,128,(c,w,h)=>{c.fillStyle='#21323a';c.fillRect(0,0,w,h);c.fillStyle='#ffbd59';c.fillRect(0,0,12,h);c.font='italic 900 66px Arial';c.textAlign='center';c.fillStyle='#f0f2e8';c.fillText('APEX  /  COASTLINE',w/2,88);});
+    const bannerTex=canvasTexture(1024,128,(c,w,h)=>{c.fillStyle='#21323a';c.fillRect(0,0,w,h);c.fillStyle='#ffbd59';c.fillRect(0,0,12,h);c.font='italic 900 60px Arial';c.textAlign='center';c.fillStyle='#f0f2e8';c.fillText('Yavuzselimerdogan',w/2,88);});
     for(const side of [-1,1]){const banner=mesh(new T.PlaneGeometry(17.7,1.8),new T.MeshBasicMaterial({map:bannerTex}),0,7.9,side*.411);if(side<0)banner.rotation.y=Math.PI;arch.add(banner);}
     this.scene.add(arch);
     const signTexture=canvasTexture(512,128,(c,w,h)=>{c.fillStyle='#f2eedd';c.fillRect(0,0,w,h);c.fillStyle='#1f343d';c.font='bold 62px Arial';c.textAlign='center';c.fillText('COASTLINE',w/2,86);});

@@ -1,8 +1,8 @@
 import * as T from './vendor/three.module.js';
 
 export const DRIVER_PROFILES = [
-  {id:0,name:'Karakter 01',shirt:0xe3ddca,hair:0x211c18,longHair:true,photo:'./drivers/driver-01.jpeg',geometry:'./drivers/driver-01.json'},
-  {id:1,name:'Karakter 02',shirt:0x111c27,hair:0x281711,longHair:false,photo:'./drivers/driver-02.jpeg',geometry:'./drivers/driver-02.json'},
+  {id:0,name:'1',shirt:0xe3ddca,hair:0x211c18,longHair:true,photo:'./drivers/driver-01.jpeg',geometry:'./drivers/driver-01.json'},
+  {id:1,name:'2',shirt:0x111c27,hair:0x281711,longHair:false,photo:'./drivers/driver-02.jpeg',geometry:'./drivers/driver-02.json'},
 ];
 const UP=new T.Vector3(0,1,0);
 const sphere=new T.SphereGeometry(1,18,14);
@@ -34,7 +34,7 @@ function hairGeometry(profile,width){
   }
   for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){const a=row*(cols+1)+col,b=a+cols+1;indices.push(a,b,a+1,b,b+1,a+1);}
   const cap=new T.BufferGeometry();cap.setAttribute('position',new T.Float32BufferAttribute(positions,3));cap.setIndex(indices);cap.computeVertexNormals();parts.push(cap);
-  const length=profile.longHair?.34:.23;
+  const length=profile.hairLength??(profile.longHair?.34:.23);
   for(const side of [-1,1])for(let strand=0;strand<15;strand++){
     const t=strand/14,depth=-.13+t*.19;
     const points=[new T.Vector3(side*width*.53,.19,depth*.5),new T.Vector3(side*width*1.07,.055,depth),new T.Vector3(side*width*1.12,-.10,depth),new T.Vector3(side*width*(profile.longHair?1.09:1.19),-length+(t*.027),depth+.015)];
@@ -88,7 +88,7 @@ export function makeDriver(asset){
   add(torso,sphere,asset.shirtMaterial,[0,.346,-.018],[.193,.245,.115]);
   add(torso,sphere,asset.shirtMaterial,[0,.524,-.012],[.218,.085,.111]);
   add(torso,sphere,asset.skinMaterial,[0,.563,.077],[.071,.041,.021]);
-  if(asset.longHair){
+  if(asset.longHair&&!asset.sleeveless){
     for(const side of [-1,1]){
       const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute([side*.027,.592,.091,side*.11,.529,.111,side*.071,.458,.114],3));g.computeVertexNormals();
       const collar=add(torso,g,black);collar.material=new T.MeshStandardMaterial({color:0x24292b,roughness:.85,side:T.DoubleSide});
@@ -109,7 +109,7 @@ export function makeDriver(asset){
   const arms=[];
   for(const side of [-1,1]){
     const shoulder=[side*.19,.51,.008],elbow=[side*.206,.332,.179],hand=[side*.126,.428,.372];
-    const upper=limb(torso,asset.shirtMaterial,shoulder,elbow,.052),lower=limb(torso,asset.longHair?asset.shirtMaterial:asset.skinMaterial,elbow,hand,asset.longHair?.039:.034);
+    const upper=limb(torso,asset.sleeveless?asset.skinMaterial:asset.shirtMaterial,shoulder,elbow,.052),lower=limb(torso,asset.longHair&&!asset.sleeveless?asset.shirtMaterial:asset.skinMaterial,elbow,hand,asset.longHair?.039:.034);
     const palm=add(torso,sphere,asset.skinMaterial,hand,[.029,.034,.023]);arms.push({side,shoulder,elbow,upper,lower,palm});
   }
   return {group,head,torso,wheel,wheelSpin,arms,asset};

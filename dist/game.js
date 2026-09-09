@@ -1,7 +1,8 @@
-import {MarshalSpeech} from './marshal-speech.js?v=photo-7';
+import {DRIVER_PROFILES} from './drivers.js?v=lidya-8';
+import {MarshalSpeech} from './marshal-speech.js?v=lidya-8';
 import { Circuit, Race, TOTAL_LAPS, clamp, angleDelta } from './simulation.js';
-import { OnlineRoom } from './online.js?v=photo-7';
-import { World } from './world.js?v=photo-7';
+import { OnlineRoom } from './online.js?v=lidya-8';
+import { World } from './world.js?v=lidya-8';
 
 const $=id=>document.getElementById(id);
 const track=new Circuit();
@@ -81,7 +82,7 @@ function chooseDriver(){
   document.querySelector(`input[name="driver"][value="${world.selectedDriver}"]`).focus({preventScroll:true});
 }
 function selectDriver(id){
-  world.setDriver(id);$('selected-driver-name').textContent=`KARAKTER 0${id+1}`;$('driver-inset-name').textContent=`KARAKTER 0${id+1}`;
+  world.setDriver(id);$('selected-driver-name').textContent=DRIVER_PROFILES[id].name;$('driver-inset-name').textContent=DRIVER_PROFILES[id].name;
 }
 function pauseRace(){
   if(state!=='racing'&&state!=='countdown')return;
@@ -109,7 +110,7 @@ function applyOnlineRoom(room){
   race.playerId=room.slot;race.multiplayer=true;race.hydrate(room.race);world.setRaceDrivers(room.players);
   $('online-status').textContent=`ODA ${room.code} · ${online.latency} ms`;show('online-status');
   $('room-code').textContent=room.code;show('room-entry',false);show('room-waiting');
-  room.players.forEach((p,i)=>{$(`room-player-${i}`).textContent=p?`Karakter 0${p.driver+1}`:'Oyuncu bekleniyor';$(`room-state-${i}`).textContent=p?(p.connected?'Bağlı':'Bağlantı bekleniyor'):'Oda kodunu paylaş';});
+  room.players.forEach((p,i)=>{$(`room-player-${i}`).textContent=p?DRIVER_PROFILES[p.driver].name:'Oyuncu bekleniyor';$(`room-state-${i}`).textContent=p?(p.connected?'Bağlı':'Bağlantı bekleniyor'):'Oda kodunu paylaş';});
   $('room-status').textContent=room.reason;$('room-start').disabled=room.slot!==0||!room.players.every(p=>p?.connected);
   if(room.phase==='lobby')return;
   if(room.phase==='closed'){chooseDriver();announce('Diğer oyuncu odadan ayrıldı.',5000);return;}
