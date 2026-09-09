@@ -1,6 +1,7 @@
+import {MarshalSpeech} from './marshal-speech.js?v=photo-7';
 import { Circuit, Race, TOTAL_LAPS, clamp, angleDelta } from './simulation.js';
-import { OnlineRoom } from './online.js?v=face-6';
-import { World } from './world.js?v=face-6';
+import { OnlineRoom } from './online.js?v=photo-7';
+import { World } from './world.js?v=photo-7';
 
 const $=id=>document.getElementById(id);
 const track=new Circuit();
@@ -48,6 +49,7 @@ class EngineAudio {
   hit(force){if(force>2)this.beep(70+Math.min(force,30),.075);}
 }
 const engine=new EngineAudio();
+const marshalSpeech=new MarshalSpeech();
 
 function show(id,yes=true){$(id).classList.toggle('hidden',!yes);}
 function clearInput(){keys.clear();touches.clear();for(const el of document.querySelectorAll('[data-control]'))el.classList.remove('pressed');Object.assign(input,{throttle:0,brake:0,steer:0,boost:false,handbrake:false});}
@@ -64,7 +66,7 @@ function announce(text,duration=2400){$('announcement').textContent=text;show('a
 function startRace(){
   if(!world.driverReady)return;
   online.close();race.playerId=0;race.multiplayer=false;show('online-lobby',false);show('online-status',false);
-  engine.start();race.reset();world.setDriver(world.selectedDriver);clearInput();world.cameraReady=false;state='countdown';countdownTime=7;lastCountdown='';accumulator=0;lastWrongWay=0;
+  marshalSpeech.reset();engine.start();race.reset();world.setDriver(world.selectedDriver);clearInput();world.cameraReady=false;state='countdown';countdownTime=7;lastCountdown='';accumulator=0;lastWrongWay=0;
   for(const id of ['intro','circuit-card','intro-footer','results','pause-screen','announcement','driver-select'])show(id,false);
   for(const id of ['hud','pause','countdown','touch-controls'])show(id);
   show('driver-inset',world.showDriver);
@@ -73,7 +75,7 @@ function startRace(){
 }
 function chooseDriver(){
   online.close();show('online-lobby',false);show('online-status',false);race.playerId=0;race.multiplayer=false;race.reset();world.setDriver(world.selectedDriver);
-  engine.start();clearInput();state='select';world.cameraReady=false;world.cameraMode=0;
+  marshalSpeech.reset();engine.start();clearInput();state='select';world.cameraReady=false;world.cameraMode=0;
   for(const id of ['intro','circuit-card','intro-footer','results','pause-screen','announcement','hud','touch-controls','pause','countdown'])show(id,false);
   show('driver-select');document.body.classList.remove('racing','boosting');
   document.querySelector(`input[name="driver"][value="${world.selectedDriver}"]`).focus({preventScroll:true});
@@ -119,7 +121,7 @@ function applyOnlineRoom(room){
   if(state==='lobby')world.cameraReady=false;
   state=room.phase==='countdown'?'countdown':'racing';show('countdown',state==='countdown');
 }
-$('online-play').addEventListener('click',()=>{state='lobby';clearInput();show('driver-select',false);show('online-lobby');show('room-entry');show('room-waiting',false);show('room-error',false);$('create-room').focus();});
+$('online-play').addEventListener('click',()=>{state='lobby';marshalSpeech.reset();clearInput();show('driver-select',false);show('online-lobby');show('room-entry');show('room-waiting',false);show('room-error',false);$('create-room').focus();});
 async function enterRoom(code){
   $('create-room').disabled=true;$('join-room').disabled=true;show('room-error',false);engine.start();
   try{await online.enter(world.selectedDriver,code);}catch(e){roomError(e.message);}finally{$('create-room').disabled=false;$('join-room').disabled=false;}
@@ -233,6 +235,9 @@ function frame(now){
   if(now>messageUntil)show('announcement',false);
   engine.update(race.player,state==='racing'||state==='countdown');
   hudTimer+=dt;if(hudTimer>.06){updateHud();hudTimer=0;}
+  if(state==='countdown'&&race.time<.05&&countdownTime<3.8&&!marshalSpeech.spoken){announce("Kıh kıh kıh… Let’s start!",3500);marshalSpeech.play(engine.enabled);}
+  if(state==='paused'||!engine.enabled)marshalSpeech.stop();
+  world.starter.speaking=marshalSpeech.speaking;
   world.starterRemaining=countdownTime;
   world.render(state==='paused'?0:dt,state);
 }
