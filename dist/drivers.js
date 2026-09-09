@@ -3,6 +3,7 @@ import * as T from './vendor/three.module.js';
 export const DRIVER_PROFILES = [
   {id:0,name:'1',shirt:0xe3ddca,hair:0x211c18,longHair:true,photo:'./drivers/driver-01.jpeg',geometry:'./drivers/driver-01.json'},
   {id:1,name:'2',shirt:0x111c27,hair:0x281711,longHair:false,photo:'./drivers/driver-02.jpeg',geometry:'./drivers/driver-02.json'},
+  {id:2,name:'Lidya pınar manifest',shirt:0x241b1b,hair:0x8b6d3f,longHair:true,sleeveless:true,hairLength:.49,photo:'./drivers/driver-03.png',geometry:'./drivers/driver-03.json'},
 ];
 const UP=new T.Vector3(0,1,0);
 const sphere=new T.SphereGeometry(1,18,14);

@@ -32,5 +32,5 @@ test('game client creates and joins using the new transport',async()=>{
  const app=createGameServer();app.server.listen(0,'127.0.0.1');await once(app.server,'listening');
  globalThis.location={origin:'http://127.0.0.1:'+app.server.address().port};globalThis.WebSocket=WebSocket;
  const {OnlineRoom}=await import('../dist/online.js');const errors=[];const options={onRoom:()=>{},onError:e=>errors.push(e.message),getInput:()=>({throttle:1})};const host=new OnlineRoom(options),guest=new OnlineRoom(options);
- try{await host.enter(0);await guest.enter(1,host.code);assert(host.active&&guest.active);assert.equal(guest.slot,1);assert.equal(host.code,guest.code);await host.action('start');await new Promise(resolve=>setTimeout(resolve,100));assert.equal(guest.room.phase,'countdown');assert.equal(errors.length,0);}finally{host.close(false);guest.close(false);await app.close();delete globalThis.location;}
+ try{await host.enter(2);await guest.enter(1,host.code);assert.equal(host.room.players[0].driver,2);assert(host.active&&guest.active);assert.equal(guest.slot,1);assert.equal(host.code,guest.code);await host.action('start');await new Promise(resolve=>setTimeout(resolve,100));assert.equal(guest.room.phase,'countdown');assert.equal(errors.length,0);}finally{host.close(false);guest.close(false);await app.close();delete globalThis.location;}
 });

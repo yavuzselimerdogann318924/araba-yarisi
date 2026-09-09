@@ -9,7 +9,7 @@ const root=fileURLToPath(new URL('../dist/',import.meta.url));
 const zero=()=>({throttle:0,brake:0,steer:0,boost:false,handbrake:false});
 const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const code=()=>Array.from(randomBytes(6),b=>alphabet[b%alphabet.length]).join('');
-const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.jpeg':'image/jpeg','.svg':'image/svg+xml'};
+const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.jpeg':'image/jpeg','.png':'image/png','.svg':'image/svg+xml'};
 function controls(value={}){if(!value||typeof value!=='object')throw Error('Geçersiz kontrol.');const result=zero();for(const key of ['throttle','brake','steer']){const n=value[key]??0;if(!Number.isFinite(n)||n>(1)||n<(key==='steer'?-1:0))throw Error('Geçersiz kontrol.');result[key]=n;}result.boost=value.boost===true;result.handbrake=value.handbrake===true;return result;}
 export function createGameServer({clock=()=>Date.now(),autoTick=true,allowedOrigins=(process.env.ALLOWED_ORIGINS||'').split(',').filter(Boolean)}={}){
  const rooms=new Map(),track=new Circuit();
@@ -45,7 +45,7 @@ export function createGameServer({clock=()=>Date.now(),autoTick=true,allowedOrig
     socket.seen=clock();
     if(message.type==='ping'){send(socket,{type:'pong',sentAt:message.sentAt,serverNow:clock()});return;}
     if(message.type==='create'||message.type==='join'){
-     if(socket.room)throw Error('Zaten bir odadasın.');if(message.driver!==0&&message.driver!==1)throw Error('Karakter seç.');
+     if(socket.room)throw Error('Zaten bir odadasın.');if(!Number.isInteger(message.driver)||message.driver<0||message.driver>2)throw Error('Karakter seç.');
      let room;
      if(message.type==='create'){
       if(rooms.size>=200)throw Error('Sunucu dolu. Daha sonra dene.');

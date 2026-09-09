@@ -1,4 +1,4 @@
-# Araba Yarışı
+# Yavuzselimerdogan
 
 
 3D karakter seçimi, tablet dokunmatik kontrolleri ve oda koduyla iki kişilik online yarış.
@@ -32,3 +32,5 @@ Fotoğraflardan oluşturulan yüz derinliği tahminidir; tam baş taraması değ
 Yarış öncesinde görevli yürür, bayrakla start verir. Referans fotoğrafı 468 noktalı, derinlikli yüz geometrisine UV ile uygulanır; düz bir resim levhası değildir. Konuşma sırasında hafif ağız ve baş hareketleri, yürüyüş ve bayrak animasyonları korunur.
 
 Görevli başlangıçta “kıh kıh kıh, let’s start” der. Ses tarayıcının yerleşik konuşma sentezidir; gerçek kişinin sesi taklit edilmez. Türkçe ve İngilizce seslerin kullanılabilirliği cihaza göre değişir. Ses kapalıysa veya konuşma sentezi desteklenmiyorsa altyazı görünür. Yaklaşık ağız hareketi kullanılır; fonem düzeyinde dudak senkronizasyonu değildir.
+
+Sürücüler: 1, 2 ve Lidya pınar manifest. Üçüncü sürücü tek oyunculu ve kodlu online yarışta seçilebilir.
