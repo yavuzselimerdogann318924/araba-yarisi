@@ -1,7 +1,8 @@
-import {makeStarter,updateStarter} from './starter.js?v=lidya-8';
+import {CombatVisuals} from './combat-visuals.js?v=missiles-9';
+import {makeStarter,updateStarter} from './starter.js?v=missiles-9';
 import * as T from './vendor/three.module.js';
 import { ROAD_HALF, clamp } from './simulation.js';
-import { loadDriverAssets, makeDriver, makeSeat, animateDriver, DriverPortrait } from './drivers.js?v=lidya-8';
+import { loadDriverAssets, makeDriver, makeSeat, animateDriver, DriverPortrait } from './drivers.js?v=missiles-9';
 
 const UP=new T.Vector3(0,1,0);
 function rng(seed=54321){return()=>{seed=(Math.imul(seed,1664525)+1013904223)|0;return(seed>>>0)/4294967296;};}
@@ -243,6 +244,7 @@ export class World {
   }
   resize(){const w=this.canvas.clientWidth,h=this.canvas.clientHeight;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
   render(dt,state){
+    this.combatVisuals??=new CombatVisuals(this.scene);this.combatVisuals.update(this.race);
     const marshalIntro=state==='countdown'&&this.race.time<.05;
     if(state!=='paused')updateStarter(this.starter,this.track,this.starterRemaining,this.race.time,marshalIntro,this.elapsed);
     if(this.wasMarshalIntro&&!marshalIntro)this.cameraReady=false;this.wasMarshalIntro=marshalIntro;
@@ -279,7 +281,7 @@ export class World {
     }
     if(!this.cameraReady||this.cameraMode===2){this.camera.position.copy(desired);this.cameraLook=look.clone();this.cameraReady=true;}else{this.camera.position.lerp(desired,1-Math.exp(-5*dt));this.cameraLook.lerp(look,1-Math.exp(-7*dt));}
     this.camera.lookAt(this.cameraLook);this.camera.fov+=(fov-this.camera.fov)*(1-Math.exp(-4*dt));this.camera.updateProjectionMatrix();
-    this.cars.forEach(c=>c.group.visible=true);this.cars[this.race.playerId].group.visible=!(this.cameraMode===2&&state!=='intro'&&state!=='select');
+    this.cars.forEach((c,i)=>{const data=this.race.cars[i];c.group.visible=!data.respawnAt&&(data.shieldUntil<=this.race.time||Math.floor(this.race.time*12)%2===0);});if(this.cameraMode===2&&state!=='intro'&&state!=='select')this.cars[this.race.playerId].group.visible=false;
     this.sun.position.set(p.x-280,p.y+440,p.z+170);this.sun.target.position.set(p.x,p.y,p.z);
     const emit=state==='racing'&&(p.offroad||p.slip>4)&&Math.abs(p.speed)>10;
     if(emit)for(let j=0;j<2;j++){

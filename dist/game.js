@@ -1,8 +1,8 @@
-import {DRIVER_PROFILES} from './drivers.js?v=lidya-8';
-import {MarshalSpeech} from './marshal-speech.js?v=lidya-8';
+import {DRIVER_PROFILES} from './drivers.js?v=missiles-9';
+import {MarshalSpeech} from './marshal-speech.js?v=missiles-9';
 import { Circuit, Race, TOTAL_LAPS, clamp, angleDelta } from './simulation.js';
-import { OnlineRoom } from './online.js?v=lidya-8';
-import { World } from './world.js?v=lidya-8';
+import { OnlineRoom } from './online.js?v=missiles-9';
+import { World } from './world.js?v=missiles-9';
 
 const $=id=>document.getElementById(id);
 const track=new Circuit();
@@ -12,7 +12,8 @@ const coarse=matchMedia('(any-pointer: coarse)').matches||navigator.maxTouchPoin
 document.documentElement.classList.toggle('touch-device',coarse);
 let state='intro',beforePause='racing',countdownTime=0,lastCountdown='',lastNow=0,accumulator=0,hudTimer=0,messageUntil=0,lastWrongWay=0;
 const keys=new Set(),touches=new Map();
-const input={throttle:0,brake:0,steer:0,boost:false,handbrake:false};
+let firePending=false;
+const input={throttle:0,brake:0,steer:0,boost:false,handbrake:false,fire:false};
 const fmt=t=>{const ms=Math.floor(Math.max(0,t)*1000);return `${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}`;};
 
 class EngineAudio {
@@ -53,13 +54,14 @@ const engine=new EngineAudio();
 const marshalSpeech=new MarshalSpeech();
 
 function show(id,yes=true){$(id).classList.toggle('hidden',!yes);}
-function clearInput(){keys.clear();touches.clear();for(const el of document.querySelectorAll('[data-control]'))el.classList.remove('pressed');Object.assign(input,{throttle:0,brake:0,steer:0,boost:false,handbrake:false});}
+function clearInput(){firePending=false;keys.clear();touches.clear();for(const el of document.querySelectorAll('[data-control]'))el.classList.remove('pressed');Object.assign(input,{throttle:0,brake:0,steer:0,boost:false,handbrake:false,fire:false});}
 function getInput(){
   const held=name=>[...touches.values()].includes(name);
   input.throttle=(keys.has('KeyW')||keys.has('ArrowUp')||held('throttle'))?1:0;
   input.brake=(keys.has('KeyS')||keys.has('ArrowDown')||held('brake'))?1:0;
   input.steer=((keys.has('KeyD')||keys.has('ArrowRight')||held('right'))?1:0)-((keys.has('KeyA')||keys.has('ArrowLeft')||held('left'))?1:0);
   input.boost=keys.has('ShiftLeft')||keys.has('ShiftRight')||held('boost');
+  input.fire=firePending||keys.has('KeyF')||held('fire');
   input.handbrake=keys.has('Space')||held('handbrake');
 }
 function announce(text,duration=2400){$('announcement').textContent=text;show('announcement');messageUntil=performance.now()+duration;}
@@ -103,7 +105,7 @@ function finishRace(){
   $('race-again').focus({preventScroll:true});engine.beep(880,.35);document.body.classList.remove('boosting');updateHud();
 }
 
-const online=new OnlineRoom({onRoom:applyOnlineRoom,onError:(e,fatal)=>{roomError(e.message);if(fatal){chooseDriver();announce(e.message,6000);}},getInput:()=>state==='racing'?{...input}:{throttle:0,brake:0,steer:0}});
+const online=new OnlineRoom({onRoom:applyOnlineRoom,onError:(e,fatal)=>{roomError(e.message);if(fatal){chooseDriver();announce(e.message,6000);}},getInput:()=>{const value=state==='racing'?{...input,fire:input.fire||firePending}:{throttle:0,brake:0,steer:0};firePending=false;return value;}});
 function roomError(message){$('room-error').textContent=message;show('room-error');if(state!=='lobby')announce(message,3000);}
 async function onlineAction(action){try{await online.action(action);}catch(e){roomError(e.message);}}
 function applyOnlineRoom(room){
@@ -152,6 +154,12 @@ function drawMap(canvas,live){
   }
 }
 function updateHud(){
+  const remaining=Math.max(0,race.player.respawnAt-race.time),cooldown=Math.max(0,race.player.fireAt-race.time),target=race.targetFor(race.player);
+  $('weapon-status').textContent=remaining>0?`YENİDEN DOĞUŞ · ${remaining.toFixed(1)} sn`:cooldown>0?`FÜZE · ${cooldown.toFixed(1)} sn`:target?'HEDEF HAZIR · F / ATEŞ':'FÜZE HAZIR · ÖNDEKİ ARACA YAKLAŞ';
+  $('respawn-status').textContent=remaining>0?`İSABET! ${remaining.toFixed(1)} sn sonra piste dönüyorsun`:'';
+  show('respawn-status',remaining>0&&state==='racing');
+  for(const button of document.querySelectorAll('[data-control="fire"]')){button.classList.toggle('target-ready',!!target&&cooldown===0&&!remaining);button.setAttribute('aria-label',cooldown>0?`Füze hazırlanıyor: ${cooldown.toFixed(1)} saniye`:'Öndeki araca füze ateşle');}
+
   const p=race.player,kmh=Math.round(Math.abs(p.speed)*3.6),gear=p.speed<-1?'R':p.speed<1?'N':Math.min(6,Math.floor(Math.abs(p.speed)/12)+1);
   $('speed').textContent=String(kmh).padStart(3,'0');$('gear').textContent=gear;
   $('position').textContent=race.done?race.finishPlace:race.position;$('lap').textContent=p.lap;$('time').textContent=fmt(race.time);
@@ -182,7 +190,7 @@ document.addEventListener('fullscreenchange',()=>{$('fullscreen').setAttribute('
 window.addEventListener('resize',()=>world.resize());
 window.visualViewport?.addEventListener('resize',()=>world.resize());
 
-const gameKeys=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','ShiftLeft','ShiftRight','KeyC','KeyR','KeyP','Escape']);
+const gameKeys=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','ShiftLeft','ShiftRight','KeyF','KeyC','KeyR','KeyP','Escape']);
 window.addEventListener('keydown',e=>{
   if(e.target.matches('input,textarea')||state==='lobby')return;
   if(gameKeys.has(e.code)&&['racing','countdown','paused'].includes(state))e.preventDefault();
@@ -193,13 +201,14 @@ window.addEventListener('keydown',e=>{
   if(state!=='racing'&&state!=='countdown')return;
   if(e.code==='KeyC'){$('camera').click();return;}
   if(e.code==='KeyR'){$('reset').click();return;}
+  if(e.code==='KeyF'&&state==='racing')firePending=true;
   keys.add(e.code);
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{clearInput();pauseRace();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){clearInput();pauseRace();}});
 for(const button of document.querySelectorAll('[data-control]')){
-  button.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='racing'&&state!=='countdown')return;button.setPointerCapture(e.pointerId);touches.set(e.pointerId,button.dataset.control);button.classList.add('pressed');});
+  button.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='racing'&&state!=='countdown')return;if(button.dataset.control==='fire'&&state==='racing')firePending=true;button.setPointerCapture(e.pointerId);touches.set(e.pointerId,button.dataset.control);button.classList.add('pressed');});
   const release=e=>{touches.delete(e.pointerId);if(![...touches.values()].includes(button.dataset.control))button.classList.remove('pressed');};
   button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
   button.addEventListener('contextmenu',e=>e.preventDefault());
@@ -222,7 +231,7 @@ function frame(now){
   }
   if(state==='racing'){
     accumulator+=dt;
-    while(accumulator>=1/60&&!race.done){if(online.active){if(Date.now()-online.lastSuccess<500&&!race.player.finished)race.drive(race.player,input,1/60);}else race.update(1/60,input);accumulator-=1/60;}
+    while(accumulator>=1/60&&!race.done){if(online.active){if(Date.now()-online.lastSuccess<500&&!race.player.finished)race.drive(race.player,input,1/60);}else {race.update(1/60,input);firePending=false;}accumulator-=1/60;}
     for(const event of race.events.splice(0)){
       if(event.type==='hit')engine.hit(event.force);
       if(event.type==='reset')announce('BACK ON TRACK',1400);
@@ -234,7 +243,7 @@ function frame(now){
     if(Math.abs(angleDelta(p.heading,roadHeading))>Math.PI*.58&&Math.abs(p.speed)>3){lastWrongWay+=dt;if(lastWrongWay>1.4){announce('WRONG WAY · USE RESET TO REJOIN',1200);lastWrongWay=0;}}else lastWrongWay=0;
   }
   if(now>messageUntil)show('announcement',false);
-  engine.update(race.player,state==='racing'||state==='countdown');
+  engine.update(race.player,!race.player.respawnAt&&(state==='racing'||state==='countdown'));
   hudTimer+=dt;if(hudTimer>.06){updateHud();hudTimer=0;}
   if(state==='countdown'&&race.time<.05&&countdownTime<3.8&&!marshalSpeech.spoken){announce("Kıh kıh kıh… Let’s start!",3500);marshalSpeech.play(engine.enabled);}
   if(state==='paused'||!engine.enabled)marshalSpeech.stop();
@@ -246,6 +255,6 @@ function frame(now){
 $('track-length').textContent=(track.length/1000).toFixed(1);drawMap($('preview-map'),false);
 $('start').disabled=false;$('start-label').textContent='KARAKTER SEÇ';
 $('start-hint').textContent=coarse?'Tablette dokunarak oyna · Yatay ekran önerilir.':'Choose your driver · WASD or arrow keys to drive';
-$('driver-control-hint').textContent=coarse?'Solda yön, sağda gaz ve fren. Birden fazla düğmeye birlikte basabilirsin.':'WASD / Arrows · Drive   Shift · Boost   Space · Handbrake';
+$('driver-control-hint').textContent=coarse?'Solda yön, sağda gaz ve fren; ATEŞ ile füze gönder. Birden fazla düğmeye birlikte basabilirsin.':'WASD / Arrows · Drive   Shift · Boost   Space · Handbrake   F · Füze';
 world.loadDrivers().then(()=>{$('online-play').disabled=false;$('confirm-driver').disabled=false;$('confirm-driver').innerHTML='YARIŞA BAŞLA <span>→</span>';}).catch(error=>{console.error(error);$('confirm-driver').disabled=false;$('confirm-driver').textContent='YÜZLER YÜKLENEMEDİ · YENİLE';$('confirm-driver').onclick=()=>location.reload();});
 requestAnimationFrame(frame);

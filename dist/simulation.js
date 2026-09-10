@@ -56,22 +56,24 @@ export class Circuit {
 export class Race {
   constructor(track,{playerId=0,multiplayer=false}={}) {this.track=track;this.playerId=playerId;this.multiplayer=multiplayer;this.reset();}
   reset() {
-    this.time=0;this.lapStart=0;this.lapTimes=[];this.done=false;this.finishPlace=0;this.events=[];
+    this.missiles=[];this.explosions=[];this.nextMissileId=1;this.time=0;this.lapStart=0;this.lapTimes=[];this.done=false;this.finishPlace=0;this.events=[];
     this.cars=CAR_COLORS.map((color,i)=>{
       const s=12+(i?Math.ceil(i/2)*11:0),lane=i===0?-2.8:(i%2?2.8:-2.8),f=this.track.at(s);
-      return {id:i,color,x:f.x+f.nx*lane,z:f.z+f.nz*lane,y:f.y,heading:Math.atan2(f.tx,f.tz),vx:0,vz:0,speed:0,yaw:0,steer:0,progress:s,lastS:s,frame:f,lane,boost:100,boosting:false,slip:0,lap:1,nextGate:this.track.length/4,finished:false,finishTime:Infinity,collisionCooldown:0,offroad:false,braking:false,lapStart:0,lapTimes:[]};
+      return {respawnAt:0,shieldUntil:0,fireAt:0,id:i,color,x:f.x+f.nx*lane,z:f.z+f.nz*lane,y:f.y,heading:Math.atan2(f.tx,f.tz),vx:0,vz:0,speed:0,yaw:0,steer:0,progress:s,lastS:s,frame:f,lane,boost:100,boosting:false,slip:0,lap:1,nextGate:this.track.length/4,finished:false,finishTime:Infinity,collisionCooldown:0,offroad:false,braking:false,lapStart:0,lapTimes:[]};
     });
     this.player=this.cars[this.playerId];this.lapTimes=this.player.lapTimes;
   }
   placeOf(player){return 1+this.cars.filter(c=>c!==player&&(c.finished?(!player.finished||c.finishTime<player.finishTime):!player.finished&&c.progress>player.progress)).length;}
   get position(){return this.placeOf(this.player);}
   resetPlayer(p=this.player) {
+    if(p.respawnAt>0||p.finished)return;
     const f=this.track.at(p.progress);
     Object.assign(p,{x:f.x,z:f.z,y:f.y,heading:Math.atan2(f.tx,f.tz),vx:0,vz:0,speed:0,yaw:0,steer:0,frame:f,lastS:f.s,slip:0});
     p.boosting=false;
-    this.events.push({type:'reset'});
+    if(p.id===this.playerId)this.events.push({type:'reset'});
   }
   drive(car,input,dt) {
+    if(car.respawnAt>0||car.finished)return;
     const f=car.frame, off=Math.abs(f.lateral||0)>ROAD_HALF+.3;
     const frontX=Math.sin(car.heading),frontZ=Math.cos(car.heading),rightX=frontZ,rightZ=-frontX;
     let forward=car.vx*frontX+car.vz*frontZ,lateral=car.vx*rightX+car.vz*rightZ;
@@ -111,6 +113,47 @@ export class Race {
     }
     car.collisionCooldown=Math.max(0,car.collisionCooldown-dt);
   }
+  targetFor(car) {
+    if(car.finished||car.respawnAt>0)return null;
+    const fx=Math.sin(car.heading),fz=Math.cos(car.heading);
+    return this.cars.filter(c=>{
+      const dx=c.x-car.x,dz=c.z-car.z,d=Math.hypot(dx,dz);
+      return c!==car&&!c.finished&&!c.respawnAt&&c.shieldUntil<=this.time&&d>3&&d<100&&(dx*fx+dz*fz)/d>.86;
+    }).sort((a,b)=>Math.hypot(a.x-car.x,a.z-car.z)-Math.hypot(b.x-car.x,b.z-car.z))[0]||null;
+  }
+  fire(car) {
+    if(car.finished||car.respawnAt>0||this.time<car.fireAt)return false;
+    const target=this.targetFor(car);if(!target)return false;
+    const heading=car.heading;
+    this.missiles.push({id:this.nextMissileId++,owner:car.id,target:target.id,x:car.x+Math.sin(heading)*3,y:car.y+1,z:car.z+Math.cos(heading)*3,heading,expires:this.time+3});
+    car.fireAt=this.time+3;return true;
+  }
+  updateCombat(dt) {
+    this.explosions=this.explosions.filter(e=>this.time-e.at<1);
+    this.missiles=this.missiles.filter(m=>{
+      if(this.time>=m.expires)return false;
+      const target=this.cars[m.target];
+      if(target&&!target.finished&&!target.respawnAt){
+        const desired=Math.atan2(target.x-m.x,target.z-m.z);
+        m.heading+=clamp(angleDelta(desired,m.heading),-3*dt,3*dt);
+        m.y+=(target.y+1-m.y)*Math.min(1,8*dt);
+      }
+      const dx=Math.sin(m.heading)*115*dt,dz=Math.cos(m.heading)*115*dt;
+      // Sweep the entire movement segment so fast missiles cannot tunnel through cars.
+      let hit=null,nearest=Infinity;
+      for(const c of this.cars){
+        if(c.id===m.owner||c.finished||c.respawnAt||c.shieldUntil>this.time||Math.abs(c.y+1-m.y)>2.5)continue;
+        const t=clamp(((c.x-m.x)*dx+(c.z-m.z)*dz)/(dx*dx+dz*dz||1),0,1);
+        if(Math.hypot(c.x-m.x-dx*t,c.z-m.z-dz*t)<1.7&&t<nearest){hit=c;nearest=t;}
+      }
+      m.x+=dx;m.z+=dz;
+      if(!hit)return true;
+      hit.respawnAt=this.time+2;
+      Object.assign(hit,{vx:0,vz:0,speed:0,yaw:0,steer:0,boosting:false,slip:0,braking:false});
+      this.explosions.push({id:m.id,x:hit.x,y:hit.y+1,z:hit.z,at:this.time});
+      return false;
+    });
+  }
   aiInput(car) {
     const speed=Math.abs(car.speed),look=12+speed*.53;
     let lane=car.lane;
@@ -126,7 +169,7 @@ export class Race {
     let curve=0;
     for(let j=0;j<6;j++)curve=Math.max(curve,Math.abs(this.track.at(car.progress+j*16).curvature));
     const target=clamp(Math.sqrt(10.7/Math.max(.001,curve)),22,54+car.id*.8);
-    return {steer,throttle:car.speed<target?1:.14,brake:clamp((car.speed-target)/9,0,1),boost:false};
+    return {steer,throttle:car.speed<target?1:.14,brake:clamp((car.speed-target)/9,0,1),boost:false,fire:this.time>5&&this.time>=car.fireAt};
   }
   updateProgress(car,dt) {
     const s=car.frame.s,L=this.track.length;
@@ -146,16 +189,25 @@ export class Race {
       car.nextGate+=L/4;
     }
   }
-  serialize(){return {time:this.time,done:this.done,cars:this.cars.map(c=>({...c,finishTime:Number.isFinite(c.finishTime)?c.finishTime:null}))};}
+  serialize(){return {missiles:this.missiles.map(m=>({...m})),explosions:this.explosions.map(e=>({...e})),nextMissileId:this.nextMissileId,time:this.time,done:this.done,cars:this.cars.map(c=>({...c,finishTime:Number.isFinite(c.finishTime)?c.finishTime:null}))};}
   hydrate(snapshot){
+    this.missiles=(snapshot.missiles||[]).map(m=>({...m}));this.explosions=(snapshot.explosions||[]).map(e=>({...e}));this.nextMissileId=snapshot.nextMissileId||1;
     this.time=snapshot.time;this.done=snapshot.done;this.cars=snapshot.cars.map(c=>({...c,finishTime:c.finishTime===null?Infinity:c.finishTime,lapTimes:[...c.lapTimes]}));this.player=this.cars[this.playerId];this.lapTimes=this.player.lapTimes;this.lapStart=this.player.lapStart;this.finishPlace=this.placeOf(this.player);this.events=[];
   }
   update(dt,input,secondInput=null) {
     if(this.done)return;
     this.time+=dt;
-    for(const car of this.cars){if(!car.finished)this.drive(car,car.id===0?input:this.multiplayer&&car.id===1?(secondInput||{}):this.aiInput(car),dt);}
+    for(const car of this.cars){
+      if(car.respawnAt>0&&this.time+1e-9>=car.respawnAt){
+        car.respawnAt=0;this.resetPlayer(car);car.shieldUntil=this.time+1;
+      }
+      if(car.finished||car.respawnAt>0)continue;
+      const control=car.id===0?(input||{}):this.multiplayer&&car.id===1?(secondInput||{}):this.aiInput(car);
+      this.drive(car,control,dt);if(control.fire)this.fire(car);
+    }
+    this.updateCombat(dt);
     for(let i=0;i<this.cars.length;i++)for(let j=i+1;j<this.cars.length;j++){
-      const a=this.cars[i],b=this.cars[j];if(a.finished||b.finished)continue;
+      const a=this.cars[i],b=this.cars[j];if(a.finished||b.finished||a.respawnAt||b.respawnAt||a.shieldUntil>this.time||b.shieldUntil>this.time)continue;
       const dx=a.x-b.x,dz=a.z-b.z,d=Math.hypot(dx,dz);
       if(d<2.25&&d>.001){
         const nx=dx/d,nz=dz/d,push=(2.25-d)*.5;
@@ -165,7 +217,7 @@ export class Race {
         if(i===0&&a.collisionCooldown<=0){this.events.push({type:'hit',force:Math.abs(relative)});a.collisionCooldown=.8;}
       }
     }
-    for(const car of this.cars)if(!car.finished)this.updateProgress(car,dt);
+    for(const car of this.cars)if(!car.finished&&!car.respawnAt)this.updateProgress(car,dt);
     if(this.multiplayer)this.done=this.cars[0].finished&&this.cars[1].finished;
   }
 }

@@ -20,6 +20,20 @@ test('real sockets: two drivers, full-speed clock independent of packet rate, sh
   app.tick();now+=1000;app.tick();const game=app.rooms.get(room.code).game;
   assert(Math.abs(game.time-1)<.02,`1 wall-clock second advanced ${game.time}s`);
   assert(game.cars[0].speed>10);assert(game.cars[1].speed>10);
+  // Both clients can request fire, but the server owns hits, cooldown and respawn.
+  game.cars.slice(2).forEach(car=>car.finished=true);
+  let seq=2;
+  for(const shooter of [0,1]){
+   game.missiles=[];
+   for(const id of [0,1]){const car=game.cars[id],s=id===shooter?100:120,f=game.track.at(s);Object.assign(car,{x:f.x,z:f.z,y:f.y,frame:f,progress:s,lastS:s,heading:Math.atan2(f.tx,f.tz),vx:0,vz:0,speed:0,respawnAt:0,shieldUntil:0,fireAt:0});}
+   for(const [id,ws] of [a,b].entries()){ws.send(JSON.stringify({type:'input',seq,input:{fire:id===shooter},missiles:[{target:1-id}]}));const pong=waitMessage(ws,d=>d.type==='pong');ws.send(JSON.stringify({type:'ping'}));await pong;}
+   now+=400;app.tick();const victim=game.cars[1-shooter];assert(victim.respawnAt>game.time);assert.equal(game.cars[shooter].respawnAt,0);
+   const fireAt=game.cars[shooter].fireAt;
+   const views=[waitMessage(a,d=>d.type==='room'),waitMessage(b,d=>d.type==='room')];app.broadcast(app.rooms.get(room.code));const [av,bv]=await Promise.all(views);
+   assert.deepEqual(av.room.race,bv.room.race);assert.equal(av.room.race.cars[1-shooter].respawnAt,victim.respawnAt);
+   seq++;for(const ws of [a,b]){ws.send(JSON.stringify({type:'input',seq,input:{},reset:true}));const pong=waitMessage(ws,d=>d.type==='pong');ws.send(JSON.stringify({type:'ping'}));await pong;}
+   assert(victim.respawnAt>0);now+=2100;app.tick();assert.equal(victim.respawnAt,0);assert.equal(game.cars[shooter].fireAt,fireAt);seq++;
+  }
   const paused=waitMessage(a,d=>d.room?.phase==='paused');b.send(JSON.stringify({type:'pause'}));await paused;const time=game.time;now+=1000;app.tick();assert.equal(game.time,time);
   const ended=waitMessage(b,d=>d.room?.phase==='closed');a.close();await ended;assert.equal(app.rooms.size,0);
  }finally{clients.forEach(c=>c.terminate());await app.close();}

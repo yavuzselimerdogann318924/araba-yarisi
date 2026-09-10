@@ -6,11 +6,11 @@ import {randomBytes} from 'node:crypto';
 import {WebSocketServer,WebSocket} from 'ws';
 import {Circuit,Race} from '../dist/simulation.js';
 const root=fileURLToPath(new URL('../dist/',import.meta.url));
-const zero=()=>({throttle:0,brake:0,steer:0,boost:false,handbrake:false});
+const zero=()=>({throttle:0,brake:0,steer:0,boost:false,handbrake:false,fire:false});
 const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const code=()=>Array.from(randomBytes(6),b=>alphabet[b%alphabet.length]).join('');
 const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.jpeg':'image/jpeg','.png':'image/png','.svg':'image/svg+xml'};
-function controls(value={}){if(!value||typeof value!=='object')throw Error('Geçersiz kontrol.');const result=zero();for(const key of ['throttle','brake','steer']){const n=value[key]??0;if(!Number.isFinite(n)||n>(1)||n<(key==='steer'?-1:0))throw Error('Geçersiz kontrol.');result[key]=n;}result.boost=value.boost===true;result.handbrake=value.handbrake===true;return result;}
+function controls(value={}){if(!value||typeof value!=='object')throw Error('Geçersiz kontrol.');const result=zero();for(const key of ['throttle','brake','steer']){const n=value[key]??0;if(!Number.isFinite(n)||n>(1)||n<(key==='steer'?-1:0))throw Error('Geçersiz kontrol.');result[key]=n;}result.fire=value.fire===true;result.boost=value.boost===true;result.handbrake=value.handbrake===true;return result;}
 export function createGameServer({clock=()=>Date.now(),autoTick=true,allowedOrigins=(process.env.ALLOWED_ORIGINS||'').split(',').filter(Boolean)}={}){
  const rooms=new Map(),track=new Circuit();
  const send=(socket,data)=>{if(socket.readyState===WebSocket.OPEN&&socket.bufferedAmount<128000)socket.send(JSON.stringify(data));};

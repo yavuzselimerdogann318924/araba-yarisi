@@ -63,3 +63,10 @@ html.touch-device .dialog-help{display:none}
 
 /* Long game name and third driver */
 .intro h1{font-size:clamp(29px,5.4vw,80px);letter-spacing:-2px;line-height:1.02}.brand{font-size:clamp(12px,1.5vw,21px);letter-spacing:0}.driver-photo-three img{object-position:50% 28%}.driver-option-copy strong{overflow-wrap:anywhere}.driver-preview-label{max-width:48%;overflow-wrap:anywhere}#driver-inset-name{max-width:95%;font-size:10px;letter-spacing:.3px}@media(max-width:600px){.driver-choice-panel{max-height:52dvh;overflow:auto}.driver-orbit{bottom:54dvh}.brand{gap:7px;font-size:12px}.intro h1{font-size:clamp(27px,7vw,42px);letter-spacing:-1px}.driver-preview-label{max-width:80%}}
+
+.weapon-status{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);font-size:11px;letter-spacing:1px;padding:9px 12px;border-radius:8px;background:#10232ddd;text-align:center;pointer-events:none;max-width:90%}
+.respawn-status{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);padding:18px 24px;background:#331712e8;border:1px solid #ff8c54;border-radius:12px;text-align:center;width:max-content;max-width:90%;font-weight:bold;font-size:18px;pointer-events:none}
+.touch-controls .touch-fire{min-width:85px;min-height:48px;border-radius:28px;background:#a83c20df;color:white;font-weight:bold;touch-action:none}
+.touch-controls .touch-fire.target-ready{background:#f27432;box-shadow:0 0 16px #ffab5966}
+html.touch-device .weapon-status{bottom:210px}
+@media(max-height:600px) and (min-width:601px){html.touch-device .weapon-status{bottom:105px}.touch-controls .touch-fire{min-width:78px;min-height:43px}}

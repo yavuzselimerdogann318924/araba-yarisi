@@ -7,7 +7,7 @@
   <meta name="description" content="Race a three-dimensional coastal circuit against five rivals. Three laps, tight corners, and a shot at first place. Play with keyboard or touch controls." />
   <title>Yavuzselimerdogan — Coastline</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./style.css?v=lidya-8" />
+  <link rel="stylesheet" href="./style.css?v=missiles-9" />
 </head>
 <body>
   <main id="game" aria-label="Yavuzselimerdogan Coastline racing game">
@@ -95,7 +95,8 @@
         <div class="boost-track"><span>BOOST</span><div><i id="boost-fill"></i></div><small class="desktop-help">SHIFT</small></div>
       </div>
       <div class="race-tools"><button id="camera" aria-label="Change camera">CAMERA <kbd>C</kbd></button><button id="driver-view" aria-label="Sürücüyü yakından göster" aria-pressed="false">SÜRÜCÜ</button><button id="reset" aria-label="Return car to track">RESET <kbd>R</kbd></button></div>
-      <div class="race-help desktop-help"><span><kbd>↑ ↓ ← →</kbd> DRIVE</span><span><kbd>SPACE</kbd> HANDBRAKE</span><span><kbd>P</kbd> PAUSE</span></div>
+      <div id="weapon-status" class="weapon-status"></div><div id="respawn-status" class="respawn-status hidden" role="status"></div>
+      <div class="race-help desktop-help"><span><kbd>F</kbd> FÜZE</span><span><kbd>↑ ↓ ← →</kbd> DRIVE</span><span><kbd>SPACE</kbd> HANDBRAKE</span><span><kbd>P</kbd> PAUSE</span></div>
     </div>
 
     <div id="announcement" class="announcement hidden" role="status" aria-live="polite"></div>
@@ -103,18 +104,18 @@
 
     <div id="touch-controls" class="touch-controls hidden" aria-label="Touch driving controls">
       <div class="steering-controls"><button data-control="left" aria-label="Steer left"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m20 7-9 9 9 9"/></svg></button><button data-control="right" aria-label="Steer right"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m12 7 9 9-9 9"/></svg></button></div>
-      <div class="touch-middle"><button class="touch-boost" data-control="boost" aria-label="Activate boost">BOOST</button><button class="touch-handbrake" data-control="handbrake" aria-label="El freni">EL FRENİ</button></div>
+      <div class="touch-middle"><button class="touch-fire" data-control="fire" aria-label="Öndeki araca füze ateşle">ATEŞ</button><button class="touch-boost" data-control="boost" aria-label="Activate boost">BOOST</button><button class="touch-handbrake" data-control="handbrake" aria-label="El freni">EL FRENİ</button></div>
       <div class="pedals"><button class="brake-pedal" data-control="brake" aria-label="Brake">FREN</button><button class="gas-pedal" data-control="throttle" aria-label="Accelerate"><span>▴</span>GAZ</button></div>
     </div>
 
-    <section id="pause-screen" class="modal-shade hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="race-dialog"><span class="eyebrow">TAKE A BREATHER</span><h2 id="pause-title">Race paused.</h2><p>Your next corner can wait.</p><button id="resume" class="primary-button">RESUME RACE <span>→</span></button><button id="restart" class="secondary-button">RESTART RACE</button><p class="dialog-help">WASD / Arrows · Drive<br>Shift · Boost &nbsp; Space · Handbrake<br>C · Camera &nbsp; R · Return to track</p></div></section>
+    <section id="pause-screen" class="modal-shade hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="race-dialog"><span class="eyebrow">TAKE A BREATHER</span><h2 id="pause-title">Race paused.</h2><p>Your next corner can wait.</p><button id="resume" class="primary-button">RESUME RACE <span>→</span></button><button id="restart" class="secondary-button">RESTART RACE</button><p class="dialog-help">WASD / Arrows · Drive<br>Shift · Boost &nbsp; Space · Handbrake<br>F · Füze<br>C · Camera &nbsp; R · Return to track</p></div></section>
 
     <section id="results" class="modal-shade hidden" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="race-dialog result-dialog"><span class="eyebrow">CHEQUERED FLAG</span><h2 id="result-title">Race complete.</h2><div class="finish-position"><strong id="finish-place">1</strong><span id="finish-suffix">ST</span></div><p id="finish-message">A drive to remember.</p><div class="finish-stats"><div><span>RACE TIME</span><strong id="finish-time">00:00.000</strong></div><div><span>BEST LAP</span><strong id="finish-best">00:00.000</strong></div></div><button id="race-again" class="primary-button">RACE AGAIN <span>→</span></button><button id="change-driver" class="secondary-button">KARAKTER DEĞİŞTİR</button></div></section>
     <div id="error" class="modal-shade hidden" role="alert"><div class="race-dialog"><h2>Let’s get you racing.</h2><p id="error-message">3D graphics could not start. Try opening this game in Safari or Chrome with hardware acceleration enabled.</p><button class="primary-button" onclick="location.reload()">TRY AGAIN</button></div></div>
   </main>
   <script src="./server-config.js"></script>
   <script type="module">
-    import('./game.js?v=lidya-8').catch(error => {
+    import('./game.js?v=missiles-9').catch(error => {
       console.error(error);
       document.getElementById('error').classList.remove('hidden');
       document.getElementById('start-label').textContent = 'UNABLE TO START';
